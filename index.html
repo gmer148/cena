@@ -34,11 +34,13 @@ h1 {
 
 .buttons {
   margin-top: 25px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
   position: relative;
-  height: 100px;
+  height: 80px;
 }
 
-/* Botões */
 button {
   padding: 10px;
   font-size: 14px;
@@ -48,26 +50,28 @@ button {
   width: 100px;
   height: 40px;
   transition: transform 0.1s ease;
-  position: absolute;
   display: flex;
   justify-content: center;
   align-items: center;
+  position: absolute;
 }
 
+/* SIM */
 #yes {
   background: #ff3366;
   color: white;
-  left: 0;
+  left: 50px;
   bottom: 0;
   transform: scale(1);
   z-index: 2;
 }
 
+/* NÃO */
 #no {
   background: #ccc;
   color: #333;
-  left: 120px;
-  bottom: 0;
+  left: 170px;
+  top: 0;
   z-index: 1;
 }
 
@@ -132,7 +136,7 @@ for (let i = 0; i < 18; i++) {
 
 <div class="card">
   <h1>Queres ser a minha Valentim? 💖</h1>
-  
+
 
   <div class="buttons">
     <button id="yes" onclick="aceitou()">SIM ❤️</button>
@@ -150,50 +154,46 @@ const yes = document.getElementById("yes");
 const no = document.getElementById("no");
 const container = document.querySelector(".buttons");
 
-let growInterval;
-let noPos = { x: 120, y: 0 }; // posição inicial do NÃO
+// posição inicial do NÃO
+let noPos = { x: 170, y: 0 };
 
 function fugir(e) {
-  // inicia crescimento infinito do SIM
-  if(!growInterval) {
-    growInterval = setInterval(() => {
-      let style = window.getComputedStyle(yes);
-      let matrix = new WebKitCSSMatrix(style.transform);
-      let scale = matrix.a; // pega escala atual
-      yes.style.transform = `scale(${scale + 0.02})`;
-    }, 50);
+  // obter posição do cursor ou touch
+  let cursorX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+  let cursorY = e.clientY || (e.touches ? e.touches[0].clientY : 0);
+
+  // aumentar o SIM gradualmente
+  let scale = parseFloat(getComputedStyle(yes).transform.split(',')[3]) || 1;
+  if(scale < 2) {
+    scale += 0.05;
+    yes.style.transform = `scale(${scale})`;
   }
 
-  // mover o NÃO aleatoriamente mas dentro do container
+  // calcular nova posição do NÃO com limites
   const containerRect = container.getBoundingClientRect();
   const buttonWidth = no.offsetWidth;
   const buttonHeight = no.offsetHeight;
 
-  const maxX = containerRect.width - buttonWidth;
-  const maxY = containerRect.height - buttonHeight;
+  let maxX = containerRect.width - buttonWidth;
+  let maxY = containerRect.height - buttonHeight;
 
   // movimentação aleatória
   noPos.x += (Math.random() * 100 - 50);
   noPos.y += (Math.random() * 40 - 20);
 
-  // limitar dentro do container
+  // limites
   noPos.x = Math.max(0, Math.min(noPos.x, maxX));
   noPos.y = Math.max(0, Math.min(noPos.y, maxY));
 
   no.style.left = noPos.x + "px";
   no.style.top = noPos.y + "px";
 
-  // tremor do NÃO
+  // tremor
   no.classList.add("shake");
   setTimeout(() => no.classList.remove("shake"), 200);
 }
 
 function aceitou() {
-  // para crescimento infinito
-  clearInterval(growInterval);
-  growInterval = null;
-
-  // SIM volta ao tamanho normal
   yes.style.transform = "scale(1)";
 
   document.getElementById("msg").style.display = "block";
